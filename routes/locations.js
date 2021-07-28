@@ -23,7 +23,7 @@ router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
   const newLocation = new LocationModel({
     locationName: req.body.locationName,
-    locationCode: req.body.locationCode,
+    locationCode: req.body.locationCode.toUpperCase(),
     airportName: req.body.airportName,
   });
 
