@@ -19,7 +19,7 @@ router.get("/", async function (req, res, next) {
   });
 });
 
-router.post("/addNew", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
   const newLocation = new LocationModel({
     locationName: req.body.locationName,
