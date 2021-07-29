@@ -7,7 +7,7 @@ async function getLocations() {
 }
 
 async function findLocation(code) {
-  return await LocationModel.find({ locationCode: code });
+  return await LocationModel.find({ locationCode: code.toUpperCase() });
 }
 
 router.get("/", async function (req, res, next) {
@@ -21,10 +21,11 @@ router.get("/", async function (req, res, next) {
 
 router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
+  const { locationName, locationCode, airportName } = { ...req.body };
   const newLocation = new LocationModel({
-    locationName: req.body.locationName,
-    locationCode: req.body.locationCode.toUpperCase(),
-    airportName: req.body.airportName,
+    locationName,
+    locationCode: locationCode.toUpperCase(),
+    airportName,
   });
 
   if (!isLocationExist.length) {
