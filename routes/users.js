@@ -3,7 +3,7 @@ var router = express.Router();
 const UserModel = require("./../models/users.model");
 
 async function getUsers() {
-  return await UserModel.find().sort({ firstName: 1 });
+  return await UserModel.find().sort({ "name.firstName": 1 });
 }
 
 async function findUser(email) {
@@ -11,7 +11,7 @@ async function findUser(email) {
 }
 
 async function findUserByEmailandPassword(email, password) {
-  return await UserModel.find({ email, password });
+  return await UserModel.findOne({ email, password });
 }
 
 /* Get all users list. */
@@ -28,10 +28,9 @@ router.get("/", async function (req, res, next) {
 router.post("/login", async function (req, res, next) {
   const { email, password } = { ...req.body };
   const foundUser = await findUserByEmailandPassword(email, password);
-  console.log(foundUser);
-  if (foundUser.length) {
+  if (foundUser) {
     res.status(200).send({
-      data: email,
+      data: { email: foundUser.email, id: foundUser._id },
       message: `Login success!`,
     });
   } else {
@@ -49,6 +48,7 @@ router.post("/", async (req, res, next) => {
     middleName = "",
     lastName,
     email,
+    dob,
     contactNo,
     alternateNo = 0,
     houseNoStreeetName,
@@ -63,10 +63,13 @@ router.post("/", async (req, res, next) => {
     photoProof,
     addressProof,
     password,
+    userType,
+    isApproved,
   } = { ...req.body };
   const newUser = new UserModel({
     name: { firstName, middleName, lastName },
     email,
+    dob,
     contactNo,
     alternateNo,
     address: {
@@ -83,6 +86,8 @@ router.post("/", async (req, res, next) => {
     photoProof,
     addressProof,
     password,
+    userType,
+    isApproved,
   });
 
   if (!isUserExist.length) {

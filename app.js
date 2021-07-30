@@ -9,6 +9,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const locationsRouter = require("./routes/locations");
 const airlinesRouter = require("./routes/airlines");
+const ticketsPurchaseRouter = require("./routes/ticketsPurchase");
 
 const app = express();
 
@@ -23,9 +24,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/api_bfly_users", usersRouter);
-app.use("/api_bfly_locations", locationsRouter);
-app.use("/api_bfly_airlines", airlinesRouter);
+app.use("/api/bfly/users", usersRouter);
+app.use("/api/bfly/locations", locationsRouter);
+app.use("/api/bfly/airlines", airlinesRouter);
+app.use("/api/bfly/tickets/purchase", ticketsPurchaseRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
