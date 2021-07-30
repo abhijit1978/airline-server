@@ -14,6 +14,22 @@ async function findUserByEmailandPassword(email, password) {
   return await UserModel.findOne({ email, password });
 }
 
+async function findUserById(_id) {
+  return await UserModel.findById({ _id });
+}
+
+async function updateLoginStatus(_id, type) {
+  return await UserModel.findByIdAndUpdate(
+    { _id },
+    {
+      $set: {
+        isLoggedIn: type,
+      },
+    },
+    { new: true }
+  );
+}
+
 /* Get all users list. */
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
@@ -25,17 +41,39 @@ router.get("/", async function (req, res, next) {
 });
 
 // User Login
-router.post("/login", async function (req, res, next) {
+router.patch("/login", async function (req, res, next) {
   const { email, password } = { ...req.body };
   const foundUser = await findUserByEmailandPassword(email, password);
   if (foundUser) {
+    const updatedUserData = await updateLoginStatus(foundUser._id, true);
     res.status(200).send({
-      data: { email: foundUser.email, id: foundUser._id },
+      data: {
+        id: updatedUserData._id,
+        name: updatedUserData.name,
+        email: updatedUserData.email,
+        isLoggedIn: updatedUserData.isLoggedIn,
+      },
       message: `Login success!`,
     });
   } else {
     res.status(400).send({
       errorMessage: "Email or Password does not match!",
+    });
+  }
+});
+
+// User Logout
+router.patch("/logout", async function (req, res, next) {
+  const { id } = { ...req.body };
+  const foundUser = await findUserById(id);
+  if (foundUser) {
+    await updateLoginStatus(id, false);
+    res.status(200).send({
+      message: `Logout success!`,
+    });
+  } else {
+    res.status(400).send({
+      errorMessage: "User not found!",
     });
   }
 });
