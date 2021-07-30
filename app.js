@@ -27,7 +27,7 @@ app.use("/", indexRouter);
 app.use("/api/bfly/users", usersRouter);
 app.use("/api/bfly/locations", locationsRouter);
 app.use("/api/bfly/airlines", airlinesRouter);
-app.use("/api/bfly/tickets/purchase", ticketsPurchaseRouter);
+app.use("/api/bfly/tickets", ticketsPurchaseRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

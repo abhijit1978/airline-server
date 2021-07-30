@@ -19,7 +19,7 @@ router.get("/", async function (req, res, next) {
   });
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/purchase", async (req, res, next) => {
   const isTicketExist = await findTickets(req.body.pnr);
   const {
     airlineName,
