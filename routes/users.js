@@ -47,11 +47,12 @@ router.patch("/login", async function (req, res, next) {
   if (foundUser) {
     const updatedUserData = await updateLoginStatus(foundUser._id, true);
     res.status(200).send({
-      data: {
+      user: {
         id: updatedUserData._id,
         name: updatedUserData.name,
         email: updatedUserData.email,
         isLoggedIn: updatedUserData.isLoggedIn,
+        userType: updatedUserData.userType,
       },
       message: `Login success!`,
     });
