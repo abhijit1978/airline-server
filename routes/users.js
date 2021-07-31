@@ -41,7 +41,7 @@ router.get("/", async function (req, res, next) {
 });
 
 // User Login
-router.patch("/login", async function (req, res, next) {
+router.put("/login", async function (req, res, next) {
   const { email, password } = { ...req.body };
   const foundUser = await findUserByEmailandPassword(email, password);
   if (foundUser) {
@@ -64,7 +64,7 @@ router.patch("/login", async function (req, res, next) {
 });
 
 // User Logout
-router.patch("/logout", async function (req, res, next) {
+router.put("/logout", async function (req, res, next) {
   const { id } = { ...req.body };
   const foundUser = await findUserById(id);
   if (foundUser) {
