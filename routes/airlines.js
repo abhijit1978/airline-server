@@ -12,29 +12,22 @@ async function findAirlines(code) {
 
 router.get("/", async function (req, res, next) {
   const airlines = await getAirlines();
-
-  res.status(200).send({
-    data: airlines,
-    message: `Total airlines retrieved ${airlines.length}`,
-  });
+  res.status(200).send(airlines);
 });
 
 router.post("/", async (req, res, next) => {
   const isAirlineExist = await findAirlines(req.body.airlineCode);
-  const { airlineName, airlineCode, imgurl } = { ...req.body };
+  const { airlineName, airlineCode, alias } = { ...req.body };
   const newAirline = new AirlineModel({
     airlineName,
     airlineCode: airlineCode.toUpperCase(),
-    imgurl,
+    alias,
   });
 
   if (!isAirlineExist.length) {
     newAirline.save((err, newAirline) => {
       if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
-      res.status(200).send({
-        successMessage: "Airline added successfully",
-        data: newAirline,
-      });
+      res.status(200).send(newAirline);
     });
   } else {
     res.status(400).send({

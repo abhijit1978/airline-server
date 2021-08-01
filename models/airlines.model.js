@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const airlineSchema = mongoose.Schema({
   airlineName: { type: String, minlength: 3, maxlength: 50 },
-  airlineCode: { type: String, minlength: 3, maxlength: 10 },
-  imgurl: { type: String, maxlength: 100 },
+  airlineCode: { type: String, minlength: 2, maxlength: 10 },
+  alias: { type: String, minlength: 2, maxlength: 20 },
 });
 
 const AirlineModel = mongoose.model("airline", airlineSchema);

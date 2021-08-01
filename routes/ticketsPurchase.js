@@ -3,7 +3,7 @@ const router = express.Router();
 const TicketsPurchaseModel = require("../models/ticket.purchase.model");
 
 async function getTickets() {
-  return await TicketsPurchaseModel.find().sort({ travelDate: 1 });
+  return await TicketsPurchaseModel.find().sort({ travelDate: -1 });
 }
 
 async function findTickets(pnr) {
@@ -13,10 +13,7 @@ async function findTickets(pnr) {
 router.get("/", async function (req, res, next) {
   const tickets = await getTickets();
 
-  res.status(200).send({
-    data: tickets,
-    message: `Total tickets retrieved ${tickets.length}`,
-  });
+  res.status(200).send(tickets);
 });
 
 router.post("/purchase", async (req, res, next) => {
@@ -24,8 +21,7 @@ router.post("/purchase", async (req, res, next) => {
   const {
     airlineName,
     flightNumber,
-    locationFrom,
-    locationTo,
+    location,
     travelDate,
     departureTime,
     arrivalTime,
@@ -37,8 +33,7 @@ router.post("/purchase", async (req, res, next) => {
   const newTicket = new TicketsPurchaseModel({
     airlineName,
     flightNumber,
-    locationFrom,
-    locationTo,
+    location,
     travelDate,
     departureTime,
     arrivalTime,
@@ -51,10 +46,7 @@ router.post("/purchase", async (req, res, next) => {
   if (!isTicketExist.length) {
     newTicket.save((err, newTicket) => {
       if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
-      res.status(200).send({
-        successMessage: "Ticket added successfully",
-        data: newTicket,
-      });
+      res.status(200).send({ message: "Ticket added successfully" });
     });
   } else {
     res.status(400).send({
