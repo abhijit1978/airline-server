@@ -12,28 +12,23 @@ async function findLocation(code) {
 
 router.get("/", async function (req, res, next) {
   const locations = await getLocations();
-
-  res.status(200).send({
-    data: locations,
-    message: `Total locations retrieved ${locations.length}`,
-  });
+  res.status(200).send(locations);
 });
 
 router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
-  const { locationName, locationCode, airportName } = { ...req.body };
+  const { locationName, locationCode } = { ...req.body };
   const newLocation = new LocationModel({
     locationName,
     locationCode: locationCode.toUpperCase(),
-    airportName,
   });
 
   if (!isLocationExist.length) {
     newLocation.save((err, newLocation) => {
       if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
       res.status(200).send({
-        successMessage: "Location added successfully",
-        data: newLocation,
+        message: "Location added successfully",
+        location: newLocation,
       });
     });
   } else {
