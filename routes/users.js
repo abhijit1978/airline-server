@@ -3,7 +3,7 @@ var router = express.Router();
 const UserModel = require("./../models/users.model");
 
 async function getUsers() {
-  return await UserModel.find().sort({ "name.firstName": 1 });
+  return await UserModel.find().sort({ dateAppied: -1 });
 }
 
 async function findUser(email) {
@@ -30,14 +30,24 @@ async function updateLoginStatus(_id, type) {
   );
 }
 
+async function updateUserRole(_id, type) {
+  return await UserModel.findByIdAndUpdate(
+    { _id },
+    {
+      $set: {
+        userType: type,
+        isApproved: true,
+      },
+    },
+    { new: true }
+  );
+}
+
 /* Get all users list. */
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
 
-  res.status(200).send({
-    data: users,
-    message: `Total users retrieved ${users.length}`,
-  });
+  res.status(200).send(users);
 });
 
 // User Login
@@ -45,21 +55,25 @@ router.put("/login", async function (req, res, next) {
   const { email, password } = { ...req.body };
   const foundUser = await findUserByEmailandPassword(email, password);
   if (foundUser) {
-    const updatedUserData = await updateLoginStatus(foundUser._id, true);
-    res.status(200).send({
-      user: {
-        id: updatedUserData._id,
-        name: updatedUserData.name,
-        email: updatedUserData.email,
-        isLoggedIn: updatedUserData.isLoggedIn,
-        userType: updatedUserData.userType,
-      },
-      message: `Login success!`,
-    });
+    if (foundUser.isApproved) {
+      const updatedUserData = await updateLoginStatus(foundUser._id, true);
+      res.status(200).send({
+        user: {
+          id: updatedUserData._id,
+          name: updatedUserData.name,
+          email: updatedUserData.email,
+          isLoggedIn: updatedUserData.isLoggedIn,
+          userType: updatedUserData.userType,
+        },
+        message: `Login success!`,
+      });
+    } else {
+      res
+        .status(400)
+        .send("Your application is not approved. Please contact at fly.com");
+    }
   } else {
-    res.status(400).send({
-      errorMessage: "Email or Password does not match!",
-    });
+    res.status(400).send("Email or Password does not match!");
   }
 });
 
@@ -76,6 +90,18 @@ router.put("/logout", async function (req, res, next) {
     res.status(400).send({
       errorMessage: "User not found!",
     });
+  }
+});
+
+// User Logout
+router.put("/role", async function (req, res, next) {
+  const { id, type } = { ...req.body };
+  const foundUser = await findUserById(id);
+  if (foundUser) {
+    await updateUserRole(id, type);
+    res.status(200).send("User is Approved and Role is updated.");
+  } else {
+    res.status(400).send("User not found!");
   }
 });
 

@@ -10,12 +10,14 @@ async function findTickets(pnr) {
   return await TicketsPurchaseModel.find({ pnr });
 }
 
+// Get all Tickets
 router.get("/", async function (req, res, next) {
   const tickets = await getTickets();
 
   res.status(200).send(tickets);
 });
 
+// Add new ticket
 router.post("/purchase", async (req, res, next) => {
   const isTicketExist = await findTickets(req.body.pnr);
   const {

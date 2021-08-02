@@ -10,11 +10,13 @@ async function findLocation(code) {
   return await LocationModel.find({ locationCode: code.toUpperCase() });
 }
 
+// Get all locations
 router.get("/", async function (req, res, next) {
   const locations = await getLocations();
   res.status(200).send(locations);
 });
 
+// Add new Loation
 router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
   const { locationName, locationCode } = { ...req.body };

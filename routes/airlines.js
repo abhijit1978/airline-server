@@ -10,11 +10,13 @@ async function findAirlines(code) {
   return await AirlineModel.find({ airlineCode: code.toUpperCase() });
 }
 
+// Get all Airlines
 router.get("/", async function (req, res, next) {
   const airlines = await getAirlines();
   res.status(200).send(airlines);
 });
 
+// Add new Airline
 router.post("/", async (req, res, next) => {
   const isAirlineExist = await findAirlines(req.body.airlineCode);
   const { airlineName, airlineCode, alias } = { ...req.body };
