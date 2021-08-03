@@ -2,12 +2,11 @@ const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema({
   name: {
-    firstName: { type: String, required: true, minlength: 5, maxlength: 50 },
+    firstName: { type: String, required: true, minlength: 3, maxlength: 50 },
     middleName: { type: String, required: false, maxlength: 50 },
     lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
   },
-  email: { type: String, require: true, minlength: 0, maxlength: 100 },
-  dob: { type: Date, require: true, default: Date.now },
+  email: { type: String, require: true, minlength: 9, maxlength: 50 },
   contactNo: { type: Number, require: true, minlength: 10, maxlength: 10 },
   alternateNo: { type: Number, require: false, minlength: 0, maxlength: 10 },
   address: {
@@ -29,12 +28,6 @@ const userSchema = mongoose.Schema({
       minlength: 2,
       maxlength: 50,
     },
-    policeStation: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 50,
-    },
     pin: {
       type: Number,
       require: true,
@@ -47,17 +40,11 @@ const userSchema = mongoose.Schema({
       minlength: 3,
       maxlength: 50,
     },
-    country: {
-      type: String,
-      require: true,
-      minlength: 3,
-      maxlength: 50,
-    },
   },
   aadharNo: String,
   pan: { type: String, require: true, minlength: 10, maxlength: 10 },
-  photoProof: String,
-  addressProof: String,
+  aadharImgUrl: { type: String, default: "some url" },
+  panImgUrl: { type: String, default: "some url" },
   password: { type: String, require: true, minlength: 8, maxlength: 20 },
   dateAppied: { type: Date, require: true, default: Date.now },
   userType: { type: String, default: "Unknown", require: true },

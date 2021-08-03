@@ -70,7 +70,9 @@ router.put("/login", async function (req, res, next) {
     } else {
       res
         .status(400)
-        .send("Your application is not approved. Please contact at fly.com");
+        .send(
+          "Your application is not approved yet. Please contact at fly.com"
+        );
     }
   } else {
     res.status(400).send("Email or Password does not match!");
@@ -113,20 +115,17 @@ router.post("/", async (req, res, next) => {
     middleName = "",
     lastName,
     email,
-    dob,
     contactNo,
     alternateNo = 0,
     houseNoStreeetName,
     cityTownVillage,
     postOffice,
-    policeStation,
     pin,
     state,
-    country,
     aadharNo,
     pan,
-    photoProof,
-    addressProof,
+    aadharImgUrl,
+    panImgUrl,
     password,
     userType,
     isApproved,
@@ -134,22 +133,19 @@ router.post("/", async (req, res, next) => {
   const newUser = new UserModel({
     name: { firstName, middleName, lastName },
     email,
-    dob,
     contactNo,
     alternateNo,
     address: {
       houseNoStreeetName,
       cityTownVillage,
       postOffice,
-      policeStation,
       pin,
       state,
-      country,
     },
     aadharNo,
     pan,
-    photoProof,
-    addressProof,
+    aadharImgUrl,
+    panImgUrl,
     password,
     userType,
     isApproved,
@@ -157,17 +153,14 @@ router.post("/", async (req, res, next) => {
 
   if (!isUserExist.length) {
     newUser.save((err, newUser) => {
-      if (err)
+      if (err) {
         res.send({ erroMessage: "Server error", status: 500, error: err });
-      res.status(200).send({
-        successMessage: "User added successfully",
-        data: newUser,
-      });
+      } else {
+        res.status(200).send("User added successfully");
+      }
     });
   } else {
-    res.status(400).send({
-      errorMessage: "User Email already exists",
-    });
+    res.status(400).send("User Email already exists");
   }
 });
 
