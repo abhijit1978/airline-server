@@ -1,9 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const moment = require("moment");
 const TicketsPurchaseModel = require("../models/ticket.purchase.model");
 
-async function getTickets() {
-  return await TicketsPurchaseModel.find().sort({ travelDate: -1 });
+async function getTickets(paramsObj) {
+  const params = {
+    travelDate: {
+      $gt: new Date(),
+    },
+  };
+  for (key in paramsObj) {
+    if (paramsObj[key]) params[key] = paramsObj[key];
+  }
+  return await TicketsPurchaseModel.find(params).sort({ travelDate: 1 });
 }
 
 async function findTickets(pnr) {
@@ -11,9 +20,9 @@ async function findTickets(pnr) {
 }
 
 // Get all Tickets
-router.get("/", async function (req, res, next) {
-  const tickets = await getTickets();
-
+router.post("/", async function (req, res, next) {
+  const paramsObj = ({ airlineName, location } = { ...req.body });
+  const tickets = await getTickets(paramsObj);
   res.status(200).send(tickets);
 });
 
