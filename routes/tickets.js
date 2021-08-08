@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
-const TicketsPurchaseModel = require("../models/ticket.purchase.model");
+const TicketsPurchaseModel = require("../models/ticket.model");
 
 async function getTickets(paramsObj) {
   const params = {
@@ -60,9 +60,7 @@ router.post("/purchase", async (req, res, next) => {
       res.status(200).send({ message: "Ticket added successfully" });
     });
   } else {
-    res.status(400).send({
-      errorMessage: "PNR already exists",
-    });
+    res.status(400).send("PNR already exists");
   }
 });
 
