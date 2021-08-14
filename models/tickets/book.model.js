@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ticketPurchaseSchema = mongoose.Schema({
+const purchaseSchema = mongoose.Schema({
   airlineName: { type: String, require: true, minlength: 3, maxlength: 50 },
   flightNumber: { type: String, require: true, minlength: 3, maxlength: 10 },
   location: { type: String, require: true, minlength: 3, maxlength: 50 },
@@ -14,6 +14,6 @@ const ticketPurchaseSchema = mongoose.Schema({
   datePurchased: { type: Date, require: true, default: Date.now },
 });
 
-const TicketPurchaseModel = mongoose.model("ticket", ticketPurchaseSchema);
+const PurchaseModel = mongoose.model("ticket", purchaseSchema);
 
-module.exports = TicketPurchaseModel;
+module.exports = PurchaseModel;

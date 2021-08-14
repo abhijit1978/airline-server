@@ -28,10 +28,7 @@ router.post("/", async (req, res, next) => {
   if (!isLocationExist.length) {
     newLocation.save((err, newLocation) => {
       if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
-      res.status(200).send({
-        message: "Location added successfully",
-        location: newLocation,
-      });
+      res.status(200).send(newLocation);
     });
   } else {
     res.status(400).send({
