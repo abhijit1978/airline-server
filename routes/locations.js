@@ -10,6 +10,19 @@ async function findLocation(code) {
   return await LocationModel.find({ locationCode: code.toUpperCase() });
 }
 
+async function updateLocation(data) {
+  return await LocationModel.findByIdAndUpdate(
+    { _id: data._id },
+    {
+      $set: {
+        locationName: data.locationName,
+        locationCode: data.locationCode,
+      },
+    },
+    { new: true }
+  );
+}
+
 // Get all locations
 router.get("/", async function (req, res, next) {
   const locations = await getLocations();
@@ -35,6 +48,15 @@ router.post("/", async (req, res, next) => {
       errorMessage: "Location code already exists",
     });
   }
+});
+
+// Update Location
+router.put("/", async function (req, res, next) {
+  // request body props validation pending!!!!
+
+  const result = await updateLocation(req.body);
+  if (result) res.status(200).send(result);
+  else res.status(400).send("Data not found!");
 });
 
 module.exports = router;

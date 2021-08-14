@@ -43,7 +43,7 @@ async function updateUserRole(_id, type) {
   );
 }
 
-/* Get all users list. */
+// Get all users list.
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
 
@@ -95,7 +95,7 @@ router.put("/logout", async function (req, res, next) {
   }
 });
 
-// User Logout
+// Approve user and Set Role
 router.put("/role", async function (req, res, next) {
   const { id, type } = { ...req.body };
   const foundUser = await findUserById(id);
@@ -107,7 +107,7 @@ router.put("/role", async function (req, res, next) {
   }
 });
 
-/* Add new user. */
+// Add new user.
 router.post("/", async (req, res, next) => {
   const isUserExist = await findUser(req.body.email);
   const {

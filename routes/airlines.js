@@ -16,6 +16,20 @@ router.get("/", async function (req, res, next) {
   res.status(200).send(airlines);
 });
 
+async function updateAirline(data) {
+  return await AirlineModel.findByIdAndUpdate(
+    { _id: data._id },
+    {
+      $set: {
+        airlineName: data.airlineName,
+        airlineCode: data.airlineCode,
+        alias: data.alias,
+      },
+    },
+    { new: true }
+  );
+}
+
 // Add new Airline
 router.post("/", async (req, res, next) => {
   const isAirlineExist = await findAirlines(req.body.airlineCode);
@@ -36,6 +50,15 @@ router.post("/", async (req, res, next) => {
       errorMessage: "Airline code already exists",
     });
   }
+});
+
+// Update Airline
+router.put("/", async function (req, res, next) {
+  // request body props validation pending!!!!
+
+  const result = await updateAirline(req.body);
+  if (result) res.status(200).send(result);
+  else res.status(400).send("Data not found!");
 });
 
 module.exports = router;
