@@ -47,6 +47,7 @@ const userSchema = mongoose.Schema({
   panImgUrl: { type: String, default: "some url" },
   password: { type: String, require: true, minlength: 8, maxlength: 20 },
   dateAppied: { type: Date, require: true, default: Date.now },
+  userID: { type: String, required: true, minlength: 7, maxlength: 7 },
   userType: { type: String, default: "Unknown", require: true },
   isApproved: { type: Boolean, default: false, require: true },
   isLoggedIn: { type: Boolean, require: true, default: false },

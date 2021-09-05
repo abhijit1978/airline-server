@@ -43,6 +43,10 @@ async function updateUserRole(_id, type) {
   );
 }
 
+const generateID = (pan, firstName, lastName) => {
+  return `${firstName.substr(0, 1)}${lastName.substr(0, 1)}${pan.substr(5, 5)}`;
+};
+
 // Get all users list.
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
@@ -147,6 +151,7 @@ router.post("/", async (req, res, next) => {
     aadharImgUrl,
     panImgUrl,
     password,
+    userID: generateID(pan, firstName, lastName),
     userType,
     isApproved,
   });
@@ -154,7 +159,7 @@ router.post("/", async (req, res, next) => {
   if (!isUserExist.length) {
     newUser.save((err, newUser) => {
       if (err) {
-        res.send({ erroMessage: "Server error", status: 500, error: err });
+        res.status(400).send({ error: err });
       } else {
         res.status(200).send("User added successfully");
       }
