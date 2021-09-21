@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 
 const dbURL = require("./configs/dev.config").DB_URL;
 mongoose
-  .connect(dbURL, {
+  .connect(process.env.MONGODB_URI || dbURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
