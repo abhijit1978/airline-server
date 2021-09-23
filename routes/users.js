@@ -1,6 +1,24 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
+const multer = require("multer");
 const UserModel = require("./../models/users.model");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, callBack) {
+    callBack(null, "./public/images/uploads");
+  },
+  filename: function (req, file, callBack) {
+    let fileName = "";
+    if (file.fieldname === "aadharImage") {
+      fileName = req.body.aadharNo + file.originalname;
+    } else {
+      fileName = req.body.pan + file.originalname;
+    }
+    callBack(null, fileName);
+  },
+});
+
+const upload = multer({ storage });
 
 async function getUsers() {
   return await UserModel.find().sort({ dateAppied: -1 });
@@ -64,6 +82,7 @@ router.put("/login", async function (req, res, next) {
       res.status(200).send({
         user: {
           id: updatedUserData._id,
+          userID: updatedUserData.userID,
           name: updatedUserData.name,
           email: updatedUserData.email,
           isLoggedIn: updatedUserData.isLoggedIn,
@@ -112,7 +131,7 @@ router.put("/role", async function (req, res, next) {
 });
 
 // Add new user.
-router.post("/", async (req, res, next) => {
+router.post("/", upload.any(), async (req, res, next) => {
   const isUserExist = await findUser(req.body.email);
   const {
     firstName,
