@@ -26,8 +26,13 @@ const bookTicketSchema = mongoose.Schema({
   passenger: {
     passengers: { type: Array, require: true },
     contacts: {
-      mobile: { type: Number, require: true, minlength: 10, maxlength: 10 },
-      email: { type: String, require: true },
+      contactNumber: {
+        type: Number,
+        require: true,
+        minlength: 10,
+        maxlength: 10,
+      },
+      emailID: { type: String, require: true },
     },
   },
   fareDetails: {
@@ -50,6 +55,6 @@ const bookTicketSchema = mongoose.Schema({
   },
 });
 
-const BookTicketModel = mongoose.model("ticket", bookTicketSchema);
+const BookTicketModel = mongoose.model("booking", bookTicketSchema);
 
 module.exports = BookTicketModel;

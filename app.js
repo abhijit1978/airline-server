@@ -11,6 +11,7 @@ const usersRouter = require("./routes/users");
 const locationsRouter = require("./routes/locations");
 const airlinesRouter = require("./routes/airlines");
 const ticketsRouter = require("./routes/tickets");
+const bookingRoutes = require("./routes/bookings");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/bfly/users", usersRouter);
 app.use("/api/bfly/locations", locationsRouter);
 app.use("/api/bfly/airlines", airlinesRouter);
 app.use("/api/bfly/tickets", ticketsRouter);
+app.use("/api/bfly/ticketsBooking", bookingRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

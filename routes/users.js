@@ -147,35 +147,42 @@ router.post("/", upload.any(), async (req, res, next) => {
     state,
     aadharNo,
     pan,
-    aadharImgUrl,
-    panImgUrl,
     password,
     userType,
     isApproved,
   } = { ...req.body };
-  const newUser = new UserModel({
-    name: { firstName, middleName, lastName },
-    email,
-    contactNo,
-    alternateNo,
-    address: {
-      houseNoStreeetName,
-      cityTownVillage,
-      postOffice,
-      pin,
-      state,
-    },
-    aadharNo,
-    pan,
-    aadharImgUrl,
-    panImgUrl,
-    password,
-    userID: generateID(pan, firstName, lastName),
-    userType,
-    isApproved,
-  });
 
   if (!isUserExist.length) {
+    let aadharImgUrl = "";
+    let panImgUrl = "";
+    req.files.forEach((item) => {
+      if (item.fieldname === "aadharImage") {
+        aadharImgUrl = item.path.replace("public", "");
+      } else {
+        panImgUrl = item.path.replace("public", "");
+      }
+    });
+    const newUser = new UserModel({
+      name: { firstName, middleName, lastName },
+      email,
+      contactNo,
+      alternateNo,
+      address: {
+        houseNoStreeetName,
+        cityTownVillage,
+        postOffice,
+        pin,
+        state,
+      },
+      aadharNo,
+      pan,
+      aadharImgUrl,
+      panImgUrl,
+      password,
+      userID: generateID(pan, firstName, lastName),
+      userType,
+      isApproved,
+    });
     newUser.save((err, newUser) => {
       if (err) {
         res.status(400).send({ error: err });
