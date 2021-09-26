@@ -28,11 +28,13 @@ router.post("/", async (req, res, next) => {
 
     newBooking.save((err, newBooking) => {
       if (err) {
-        res.status(400).send(err);
+        res.status(400).send({ error: err });
       } else {
-        res
-          .status(200)
-          .send({ message: "Ticket added successfully", data: newBooking });
+        res.status(200).send({
+          message: "Ticket added successfully",
+          data: newBooking,
+          error: "undefined",
+        });
       }
     });
   } else {
