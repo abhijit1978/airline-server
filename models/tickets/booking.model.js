@@ -26,6 +26,7 @@ const bookTicketSchema = mongoose.Schema({
   passenger: {
     infants: { type: Array },
     passengers: { type: Array, require: true },
+    infants: { type: Array },
     contacts: {
       contactNumber: {
         type: Number,
