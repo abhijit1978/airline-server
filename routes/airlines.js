@@ -12,8 +12,8 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ dest: "./pulic/images/uploads/" });
-// const upload = multer({ dest: "uploads" });
+const upload = multer({ dest: "./public/images/uploads/" });
+// const upload = multer({ storage });
 
 async function getAirlines() {
   return await AirlineModel.find().sort({ airlineName: 1 });
