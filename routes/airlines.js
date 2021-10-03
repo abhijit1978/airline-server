@@ -1,6 +1,19 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 const AirlineModel = require("../models/airlines.model");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, callBack) {
+    callBack(null, "./public/images/uploads/");
+  },
+  filename: function (req, file, callBack) {
+    callBack(null, `logo-${req.body.alias}.png`);
+  },
+});
+
+const upload = multer({ dest: "./pulic/images/uploads/" });
+// const upload = multer({ dest: "uploads" });
 
 async function getAirlines() {
   return await AirlineModel.find().sort({ airlineName: 1 });
@@ -31,13 +44,16 @@ async function updateAirline(data) {
 }
 
 // Add new Airline
-router.post("/", async (req, res, next) => {
+router.post("/", upload.single("airlineLogo"), async (req, res, next) => {
   const isAirlineExist = await findAirlines(req.body.airlineCode);
+  let airlineLogo = "some image";
+  console.log(req.file, req.body);
   const { airlineName, airlineCode, alias } = { ...req.body };
   const newAirline = new AirlineModel({
     airlineName,
     airlineCode: airlineCode.toUpperCase(),
     alias,
+    airlineLogo,
   });
 
   if (!isAirlineExist.length) {
