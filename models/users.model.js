@@ -41,7 +41,7 @@ const userSchema = mongoose.Schema({
       maxlength: 50,
     },
   },
-  aadharNo: { type: String, require: ture, minlength: 0, maxlength: 10 },
+  aadharNo: { type: String, require: true, minlength: 0, maxlength: 12 },
   pan: { type: String, require: true, minlength: 10, maxlength: 10 },
   aadharImgUrl: { type: String, default: "some url" },
   panImgUrl: { type: String, default: "some url" },

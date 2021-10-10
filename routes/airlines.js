@@ -8,12 +8,11 @@ const storage = multer.diskStorage({
     callBack(null, "./public/images/uploads/");
   },
   filename: function (req, file, callBack) {
-    callBack(null, `logo-${req.body.alias}.png`);
+    callBack(null, `airline-${new Date().getTime()}.png`);
   },
 });
 
-const upload = multer({ dest: "./public/images/uploads/" });
-// const upload = multer({ storage });
+const upload = multer({ storage });
 
 async function getAirlines() {
   return await AirlineModel.find().sort({ airlineName: 1 });
@@ -30,24 +29,34 @@ router.get("/", async function (req, res, next) {
 });
 
 async function updateAirline(data) {
+  let updateObj = {};
+  if (data.airlineLogo) {
+    updateObj = {
+      airlineName: data.airlineName,
+      alias: data.alias,
+      airlineLogo: data.airlineLogo,
+    };
+  } else {
+    updateObj = {
+      airlineName: data.airlineName,
+      alias: data.alias,
+    };
+  }
   return await AirlineModel.findByIdAndUpdate(
     { _id: data._id },
-    {
-      $set: {
-        airlineName: data.airlineName,
-        airlineCode: data.airlineCode,
-        alias: data.alias,
-      },
-    },
+    { $set: updateObj },
     { new: true }
   );
 }
 
 // Add new Airline
-router.post("/", upload.single("airlineLogo"), async (req, res, next) => {
+router.post("/", upload.any(), async (req, res, next) => {
+  let airlineLogo = "";
+  req.files.forEach((item) => {
+    airlineLogo = item.path.replace("public", "");
+  });
   const isAirlineExist = await findAirlines(req.body.airlineCode);
-  let airlineLogo = "some image";
-  console.log(req.file, req.body);
+
   const { airlineName, airlineCode, alias } = { ...req.body };
   const newAirline = new AirlineModel({
     airlineName,
@@ -69,10 +78,12 @@ router.post("/", upload.single("airlineLogo"), async (req, res, next) => {
 });
 
 // Update Airline
-router.put("/", async function (req, res, next) {
-  // request body props validation pending!!!!
-
-  const result = await updateAirline(req.body);
+router.put("/", upload.any(), async (req, res, next) => {
+  let airlineLogo = "";
+  req.files.forEach((item) => {
+    airlineLogo = item.path.replace("public", "");
+  });
+  const result = await updateAirline({ ...req.body, airlineLogo });
   if (result) res.status(200).send(result);
   else res.status(400).send("Data not found!");
 });
