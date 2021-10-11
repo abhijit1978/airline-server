@@ -67,7 +67,7 @@ router.post("/", upload.any(), async (req, res, next) => {
 
   if (!isAirlineExist.length) {
     newAirline.save((err, newAirline) => {
-      if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
+      if (err) res.status(400).send({ message: err, error: true });
       else res.status(200).send(newAirline);
     });
   } else {

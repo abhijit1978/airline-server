@@ -40,12 +40,12 @@ router.post("/", async (req, res, next) => {
 
   if (!isLocationExist.length) {
     newLocation.save((err, newLocation) => {
-      if (err) res.send({ erroMessage: "Some error", status: 500, error: err });
+      if (err) res.status(400).send({ message: err, error: true });
       res.status(200).send(newLocation);
     });
   } else {
     res.status(400).send({
-      errorMessage: "Location code already exists",
+      message: "Location code already exists",
     });
   }
 });
@@ -56,7 +56,7 @@ router.put("/", async function (req, res, next) {
 
   const result = await updateLocation(req.body);
   if (result) res.status(200).send(result);
-  else res.status(400).send("Data not found!");
+  else res.status(400).send({ error: true, message: "Data not found" });
 });
 
 module.exports = router;
