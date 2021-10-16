@@ -14,6 +14,10 @@ async function getTickets(paramsObj) {
   return await PurchaseModel.find(params).sort({ travelDate: -1 });
 }
 
+async function getStocks() {
+  return await StockModel.find();
+}
+
 async function getSalableTickets(paramsObj) {
   const params = {
     "salable.startDate": { $lte: Moment().format("YYYY-MM-DD") },
@@ -88,12 +92,19 @@ async function isSalable(startDate, endDate, pnr, qty) {
 
 // Route - Get all Tickets
 router.post("/", async function (req, res, next) {
-  const paramsObj = ({ airlineName, location } = { ...req.body });
-  const tickets = await getTickets(paramsObj);
-  res.status(200).send(tickets);
+  const tickets = await getTickets(req.body);
+  const stocks = await getStocks();
+
+  const ticketsWithStock = [];
+  tickets.forEach((element) => {
+    const stock = stocks.find((item) => item.pnr === element.pnr);
+    ticketsWithStock.push({ ...element._doc, stock });
+  });
+
+  res.status(200).send(ticketsWithStock);
 });
 
-// Route - Get all salable Tickets
+// Route - Get all salable Tickets for Ticket Search
 router.post("/getsalable", async function (req, res, next) {
   const tickets = await getSalableTickets(req.body);
   res.status(200).send(tickets);

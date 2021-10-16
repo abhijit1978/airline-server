@@ -17,6 +17,8 @@ async function updateLocation(data) {
       $set: {
         locationName: data.locationName,
         locationCode: data.locationCode,
+        srcAirportName: data.srcAirportName,
+        destAirportName: data.destAirportName,
       },
     },
     { new: true }
@@ -32,10 +34,14 @@ router.get("/", async function (req, res, next) {
 // Add new Loation
 router.post("/", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
-  const { locationName, locationCode } = { ...req.body };
+  const { locationName, locationCode, srcAirportName, destAirportName } = {
+    ...req.body,
+  };
   const newLocation = new LocationModel({
     locationName,
     locationCode: locationCode.toUpperCase(),
+    srcAirportName,
+    destAirportName,
   });
 
   if (!isLocationExist.length) {
@@ -45,6 +51,7 @@ router.post("/", async (req, res, next) => {
     });
   } else {
     res.status(400).send({
+      error: true,
       message: "Location code already exists",
     });
   }
@@ -52,8 +59,6 @@ router.post("/", async (req, res, next) => {
 
 // Update Location
 router.put("/", async function (req, res, next) {
-  // request body props validation pending!!!!
-
   const result = await updateLocation(req.body);
   if (result) res.status(200).send(result);
   else res.status(400).send({ error: true, message: "Data not found" });
