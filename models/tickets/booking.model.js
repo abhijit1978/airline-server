@@ -24,7 +24,6 @@ const bookTicketSchema = mongoose.Schema({
     pnr: { type: String, require: true, minlength: 3, maxlength: 20 },
   },
   passenger: {
-    infants: { type: Array },
     passengers: { type: Array, require: true },
     infants: { type: Array },
     contacts: {

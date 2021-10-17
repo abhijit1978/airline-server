@@ -20,6 +20,10 @@ async function getSalable(pnr) {
   return await SalableTicketModel.find({ pnr });
 }
 
+async function getAllBookedTickets(data) {
+  return await BookTicketModel.find();
+}
+
 async function getTicketStock(pnr) {
   return await StockModel.find({ pnr });
 }
@@ -68,6 +72,11 @@ router.post("/", async (req, res, next) => {
   } else {
     res.status(400).send({ error: "Requested ticket quantity not available." });
   }
+});
+
+router.post("/getBookedTickets", async (req, res, next) => {
+  const allBookedTickets = await getAllBookedTickets();
+  res.status(200).send(allBookedTickets);
 });
 
 module.exports = router;
