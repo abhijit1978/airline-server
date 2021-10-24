@@ -51,6 +51,31 @@ async function updateSalableTicket(data) {
   );
 }
 
+function isValidSaleData(data) {
+  const isValid = true;
+  for (key in data) {
+    if (!data[key]) {
+      isValid = false;
+    }
+  }
+  return isValid;
+}
+
+async function confirmSale(data) {
+  const tickets = await BookTicketModel.findById(data.id);
+  if (tickets.length) {
+    return "Id not found";
+  } else {
+    return await BookTicketModel.findByIdAndUpdate(
+      { _id: data.id },
+      {
+        $set: { action: { saleReff: data.saleReff, saleDate: data.saleDate } },
+      },
+      { new: true }
+    );
+  }
+}
+
 router.post("/", async (req, res, next) => {
   const data = req.body;
   const isValid = await validate(data);
@@ -77,6 +102,17 @@ router.post("/", async (req, res, next) => {
 router.post("/getBookedTickets", async (req, res, next) => {
   const allBookedTickets = await getAllBookedTickets();
   res.status(200).send(allBookedTickets);
+});
+
+router.post("/confirmSale", async (req, res, next) => {
+  if (isValidSaleData()) {
+    const soldTicket = await confirmSale(req.body);
+    if (soldTicket) {
+      res.status(200).send({ message: "Sale confirmed.", error: undefined });
+    } else {
+      res.status(400).send({ message: "Some error", error: true });
+    }
+  }
 });
 
 module.exports = router;

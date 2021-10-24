@@ -54,6 +54,10 @@ const bookTicketSchema = mongoose.Schema({
     email: { type: String, require: true, minlength: 3, maxlength: 50 },
     bookingDate: { type: Date, require: true },
   },
+  action: {
+    saleReff: { type: String, default: "na" },
+    saleDate: { type: Date },
+  },
 });
 
 const BookTicketModel = mongoose.model("booking", bookTicketSchema);

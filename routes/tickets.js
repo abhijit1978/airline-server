@@ -22,6 +22,7 @@ async function getSalableTickets(paramsObj) {
   const params = {
     "salable.startDate": { $lte: Moment().format("YYYY-MM-DD") },
     "salable.endDate": { $gte: Moment().format("YYYY-MM-DD") },
+    "salable.qty": { $gte: 1 },
   };
   for (key in paramsObj) {
     if (key === "locationCode") {
