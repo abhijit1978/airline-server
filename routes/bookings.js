@@ -21,7 +21,14 @@ async function getSalable(pnr) {
 }
 
 async function getAllBookedTickets(data) {
-  return await BookTicketModel.find();
+  console.log(data);
+  if (!data.agentId) {
+    return await BookTicketModel.find().sort({ "agent.bookingDate": -1 });
+  } else {
+    return await BookTicketModel.find({ "agent.id": data.agentId }).sort({
+      "agent.bookingDate": -1,
+    });
+  }
 }
 
 async function getTicketStock(pnr) {
@@ -100,7 +107,7 @@ router.post("/", async (req, res, next) => {
 });
 
 router.post("/getBookedTickets", async (req, res, next) => {
-  const allBookedTickets = await getAllBookedTickets();
+  const allBookedTickets = await getAllBookedTickets(req.body);
   res.status(200).send(allBookedTickets);
 });
 
