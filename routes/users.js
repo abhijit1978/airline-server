@@ -61,6 +61,15 @@ async function updateUserRole(_id, type) {
   );
 }
 
+async function giveLimit(_id, limit, user) {
+  console.log(user);
+  return await UserModel.findByIdAndUpdate(
+    { _id },
+    { $set: { limit } },
+    { new: true }
+  );
+}
+
 const generateID = (pan, firstName, lastName) => {
   return `${firstName.substr(0, 1)}${lastName.substr(0, 1)}${pan.substr(5, 5)}`;
 };
@@ -124,6 +133,18 @@ router.put("/role", async function (req, res, next) {
   const foundUser = await findUserById(id);
   if (foundUser) {
     await updateUserRole(id, type);
+    res.status(200).send("User is Approved and Role is updated.");
+  } else {
+    res.status(400).send("User not found!");
+  }
+});
+
+// Provide / Update Limit
+router.put("/setLimit", async function (req, res, next) {
+  const { id, limit } = { ...req.body };
+  const user = await findUserById(id);
+  if (user) {
+    await updateUserRole(id, type, user);
     res.status(200).send("User is Approved and Role is updated.");
   } else {
     res.status(400).send("User not found!");

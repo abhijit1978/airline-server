@@ -41,7 +41,7 @@ const userSchema = mongoose.Schema({
       maxlength: 50,
     },
   },
-  aadharNo: { type: String, require: true, minlength: 0, maxlength: 12 },
+  aadharNo: { type: String, require: true, minlength: 12, maxlength: 12 },
   pan: { type: String, require: true, minlength: 10, maxlength: 10 },
   aadharImgUrl: { type: String, default: "some url" },
   panImgUrl: { type: String, default: "some url" },
@@ -51,6 +51,7 @@ const userSchema = mongoose.Schema({
   userType: { type: String, default: "Unknown", require: true },
   isApproved: { type: Boolean, default: false, require: true },
   isLoggedIn: { type: Boolean, require: true, default: false },
+  limit: { type: Number, require: true, default: 0 },
 });
 
 const UserModel = mongoose.model("user", userSchema);
