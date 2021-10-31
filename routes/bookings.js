@@ -3,14 +3,25 @@ const router = express.Router();
 const BookTicketModel = require("../models/tickets/booking.model");
 const SalableTicketModel = require("../models/tickets/salable.model");
 const StockModel = require("../models/tickets/stock.model");
+const UserModel = require("../models/users.model");
 const Moment = require("moment");
+
+let oldLimit = 0;
 
 async function validate(data) {
   let valid = false;
+
   const salableTicket = await getSalable(data.travel.pnr);
   const salableQty = salableTicket.length ? salableTicket[0].salable.qty : 0;
+  const user = await findUserById(data.agent.id);
+  oldLimit = user.limit;
+  const rate = data.fareDetails.rate;
 
-  if (salableQty >= data.fareDetails.bookQty) {
+  if (
+    salableQty >= data.fareDetails.bookQty &&
+    salableTicket[0].salable.salePrice === rate &&
+    oldLimit >= rate * data.fareDetails.bookQty
+  ) {
     valid = true;
   }
   return valid;
@@ -20,8 +31,21 @@ async function getSalable(pnr) {
   return await SalableTicketModel.find({ pnr });
 }
 
+async function findUserById(id) {
+  return await UserModel.findById({ _id: id });
+}
+
+async function updateLimit(data) {
+  const userId = data.agent.id;
+  const newLimit = oldLimit - data.fareDetails.rate * data.fareDetails.bookQty;
+  return await UserModel.findByIdAndUpdate(
+    { _id: userId },
+    { $set: { limit: newLimit } },
+    { new: true }
+  );
+}
+
 async function getAllBookedTickets(data) {
-  console.log(data);
   if (!data.agentId) {
     return await BookTicketModel.find().sort({ "agent.bookingDate": -1 });
   } else {
@@ -89,6 +113,7 @@ router.post("/", async (req, res, next) => {
   if (isValid) {
     await updateSalableTicket(data);
     await updateStock(data);
+    await updateLimit(data);
     const newBooking = new BookTicketModel({ ...data });
     newBooking.save((err, newBooking) => {
       if (err) {
@@ -102,7 +127,10 @@ router.post("/", async (req, res, next) => {
       }
     });
   } else {
-    res.status(400).send({ error: "Requested ticket quantity not available." });
+    res.status(400).send({
+      error:
+        "Requested ticket Quantity or Rate mismatch. Please back to Ticket booking page and try again.",
+    });
   }
 });
 

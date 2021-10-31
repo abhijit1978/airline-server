@@ -61,8 +61,7 @@ async function updateUserRole(_id, type) {
   );
 }
 
-async function giveLimit(_id, limit, user) {
-  console.log(user);
+async function setimit(_id, limit) {
   return await UserModel.findByIdAndUpdate(
     { _id },
     { $set: { limit } },
@@ -77,8 +76,23 @@ const generateID = (pan, firstName, lastName) => {
 // Get all users list.
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
-
   res.status(200).send(users);
+});
+
+// Get one user.
+router.post("/oneUser", async function (req, res, next) {
+  const user = await UserModel.find({ _id: req.body.id });
+  res.status(200).send({
+    user: {
+      id: user[0]._id,
+      userID: user[0].userID,
+      name: user[0].name,
+      email: user[0].email,
+      isLoggedIn: user[0].isLoggedIn,
+      userType: user[0].userType,
+      limit: user[0].limit,
+    },
+  });
 });
 
 // User Login
@@ -96,6 +110,7 @@ router.put("/login", async function (req, res, next) {
           email: updatedUserData.email,
           isLoggedIn: updatedUserData.isLoggedIn,
           userType: updatedUserData.userType,
+          limit: updatedUserData.limit,
         },
         message: `Login success!`,
       });
@@ -139,15 +154,19 @@ router.put("/role", async function (req, res, next) {
   }
 });
 
-// Provide / Update Limit
+// Set  Limit
 router.put("/setLimit", async function (req, res, next) {
   const { id, limit } = { ...req.body };
   const user = await findUserById(id);
   if (user) {
-    await updateUserRole(id, type, user);
-    res.status(200).send("User is Approved and Role is updated.");
+    await setimit(id, limit);
+    res
+      .status(200)
+      .send({ message: "Limit updated succeffully", error: undefined });
   } else {
-    res.status(400).send("User not found!");
+    res
+      .status(400)
+      .send({ message: "Limit updated failed", error: "User not found." });
   }
 });
 
