@@ -61,6 +61,18 @@ async function updateUserRole(_id, type) {
   );
 }
 
+async function changePsd(_id, password) {
+  return await UserModel.findByIdAndUpdate(
+    { _id },
+    {
+      $set: {
+        password,
+      },
+    },
+    { new: true }
+  );
+}
+
 async function setimit(_id, limit) {
   return await UserModel.findByIdAndUpdate(
     { _id },
@@ -165,6 +177,18 @@ router.put("/role", async function (req, res, next) {
     res.status(200).send("User is Approved and Role is updated.");
   } else {
     res.status(400).send("User not found!");
+  }
+});
+
+// Change Password
+router.post("/changePassword", async function (req, res, next) {
+  const { id, oldPassword, password } = { ...req.body };
+  const foundUser = await findUserById(id);
+  if (!foundUser || foundUser.password !== oldPassword) {
+    res.status(400).send("User not found or incorrect current password!");
+  } else {
+    await changePsd(id, password);
+    res.status(200).send("Password updated.");
   }
 });
 
