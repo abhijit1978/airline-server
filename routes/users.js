@@ -81,16 +81,23 @@ router.get("/", async function (req, res, next) {
 
 // Get one user.
 router.post("/oneUser", async function (req, res, next) {
-  const user = await UserModel.find({ _id: req.body.id });
+  const user = await UserModel.findById(req.body.id);
   res.status(200).send({
     user: {
-      id: user[0]._id,
-      userID: user[0].userID,
-      name: user[0].name,
-      email: user[0].email,
-      isLoggedIn: user[0].isLoggedIn,
-      userType: user[0].userType,
-      limit: user[0].limit,
+      id: user._id,
+      userID: user.userID,
+      name: user.name,
+      email: user.email,
+      isLoggedIn: user.isLoggedIn,
+      userType: user.userType,
+      limit: user.limit,
+      address: user.address,
+      aadharNo: user.aadharNo,
+      aadharImgUrl: user.aadharImgUrl,
+      pan: user.pan,
+      panImgUrl: user.panImgUrl,
+      contactNo: user.contactNo,
+      alternateNo: user.alternateNo,
     },
   });
 });
@@ -111,6 +118,13 @@ router.put("/login", async function (req, res, next) {
           isLoggedIn: updatedUserData.isLoggedIn,
           userType: updatedUserData.userType,
           limit: updatedUserData.limit,
+          address: updatedUserData.address,
+          aadharNo: updatedUserData.aadharNo,
+          aadharImgUrl: updatedUserData.aadharImgUrl,
+          pan: updatedUserData.pan,
+          panImgUrl: updatedUserData.panImgUrl,
+          contactNo: updatedUserData.contactNo,
+          alternateNo: updatedUserData.alternateNo,
         },
         message: `Login success!`,
       });
