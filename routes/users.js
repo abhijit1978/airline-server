@@ -49,7 +49,12 @@ function password_generator(len) {
 const upload = multer({ storage });
 
 async function getUsers() {
-  return await UserModel.find().sort({ dateAppied: -1 });
+  return await UserModel.find(
+    {},
+    "userID name email contactNo alternateNo address aadharNo aadharImgUrl pan panImgUrl userType limit isApproved"
+  ).sort({
+    dateAppied: -1,
+  });
 }
 
 async function findUser(email) {
