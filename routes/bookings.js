@@ -69,6 +69,10 @@ async function updateStock(data) {
         booked: stock.booked + data.fareDetails.bookQty,
         inHand: stock.inHand - data.fareDetails.bookQty,
       },
+    },
+    {
+      new: true,
+      useFindAndModify: false,
     }
   );
 }
@@ -78,7 +82,11 @@ async function updateSalableTicket(data) {
   const ticket = tickets[0]["_doc"];
   await SalableTicketModel.findOneAndUpdate(
     { pnr: data.travel.pnr },
-    { $set: { "salable.qty": ticket.salable.qty - data.fareDetails.bookQty } }
+    { $set: { "salable.qty": ticket.salable.qty - data.fareDetails.bookQty } },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
   );
 }
 

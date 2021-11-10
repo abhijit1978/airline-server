@@ -3,6 +3,51 @@ const router = express.Router();
 const multer = require("multer");
 const UserModel = require("./../models/users.model");
 
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const CLIENT_ID =
+  "546266880705-d33jt2ips8qecf254a5ldaaircem6miq.apps.googleusercontent.com";
+const CLIENT_SECRET = "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";
+const REFRESH_TOKEN =
+  "1//04ySzbrFqs0waCgYIARAAGAQSNwF-L9Ir5XaMb48pQUOzY7H8BOo2Ec5REdM1jDTVBl5uzBMjOG6LawDqWQkAxfEvR_yYj7LDH-I";
+const REDIRECT_URI = "https://developers.google.com/oauthplayground";
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+async function sendMail(userEmail) {
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
+
+    const transport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: "barkat.travel@gmail.com",
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken,
+      },
+    });
+
+    const mailOptions = {
+      from: "Barkat Tours and Travels <barkat.travel@gmail.com>",
+      to: userEmail,
+      subject: "Mail sent using oAuth",
+      text: "Mail sent using oAuth",
+    };
+
+    const result = await transport.sendMail(mailOptions);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, callBack) {
     callBack(null, "./public/images/uploads");
@@ -87,13 +132,15 @@ async function updateLoginStatus(_id, type) {
 }
 
 async function updateUserRole(_id, type) {
+  const updateObj =
+    type == "Unknown"
+      ? { isApproved: false, userType: "Unknown" }
+      : { userType: type, isApproved: true };
+
   return await UserModel.findByIdAndUpdate(
     { _id },
     {
-      $set: {
-        userType: type,
-        isApproved: true,
-      },
+      $set: updateObj,
     },
     { new: true }
   );
@@ -166,7 +213,7 @@ router.put("/login", async function (req, res, next) {
   const { email, password } = { ...req.body };
   const foundUser = await findUserByEmailandPassword(email, password);
   if (foundUser) {
-    if (foundUser.isApproved) {
+    if (foundUser.isApproved && foundUser.userType !== "Unknown") {
       const updatedUserData = await updateLoginStatus(foundUser._id, true);
       res.status(200).send({
         user: {
@@ -220,8 +267,11 @@ router.put("/role", async function (req, res, next) {
   const { id, type } = { ...req.body };
   const foundUser = await findUserById(id);
   if (foundUser) {
-    await updateUserRole(id, type);
-    res.status(200).send("User is Approved and Role is updated.");
+    const user = await updateUserRole(id, type);
+    res.status(200).send(user);
+    sendMail(user.email)
+      .then((result) => console.log("mail sent"))
+      .catch((error) => console.log(error.message));
   } else {
     res.status(400).send("User not found!");
   }
@@ -333,3 +383,45 @@ router.post("/", upload.any(), async (req, res, next) => {
 });
 
 module.exports = router;
+
+/**
+ * 
+ * //================================EMAIl===============================
+const nodemailer = require("nodemailer");
+const transporter = nodemailer.createTransport({
+  // service: "gmail",
+  host: "host.barkattravels.com",
+  port: 25,
+  secure: false,
+  auth: {
+    user: "info@barkattravels.com",
+    pass: "!2oY4LKu*",
+  },
+});
+const approveUserMailSend = (data) => {
+  return {
+    from: "barkat.travel@gmail.com",
+    to: data.email,
+    subject: "Approval of becoming parter.",
+    html: `<h3>Congratulations.<h3>
+          <p>Your application for becoming partner of Barkat Tours and Travels is being approved.</p>
+          <p><br /><br />Thanks and regards,<br />Barkat Sheikh</p>`,
+  };
+};
+//===============================================================
+ * transporter.verify(function (error, success) {
+      if (error) {
+        console.log("mail connection varify ", error);
+      } else {
+        console.log("Server is ready to take our messages");
+        const mailOptions = approveUserMailSend(user);
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        });
+      }
+    });
+ */

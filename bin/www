@@ -12,7 +12,7 @@ var http = require("http");
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || "5001");
+var port = normalizePort(5001);
 app.set("port", port);
 
 /**
@@ -67,7 +67,7 @@ function onError(error) {
       process.exit(1);
       break;
     case "EADDRINUSE":
-      console.error(bind + " is already in use");
+      console.error(bind + " == is already in use");
       process.exit(1);
       break;
     default:

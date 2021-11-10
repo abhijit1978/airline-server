@@ -58,7 +58,10 @@ async function findInSalable(data) {
     return SalableTicketModel.findOneAndUpdate(
       { pnr: data.pnr },
       { $set: { salable } },
-      { new: true }
+      {
+        new: true,
+        useFindAndModify: false,
+      }
     );
   } else {
     return false;
