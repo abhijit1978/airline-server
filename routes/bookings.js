@@ -4,6 +4,7 @@ const BookTicketModel = require("../models/tickets/booking.model");
 const SalableTicketModel = require("../models/tickets/salable.model");
 const StockModel = require("../models/tickets/stock.model");
 const UserModel = require("../models/users.model");
+const AccountsModel = require("../models/accounts.model");
 const Moment = require("moment");
 
 let oldLimit = 0;
@@ -115,13 +116,52 @@ async function confirmSale(data) {
   }
 }
 
+async function getTecketID(data) {
+  const { firstName, lastName } = { ...data.agent.agentName };
+  const totalTickets = await BookTicketModel.find({
+    "agent.id": data.agent.id,
+  });
+  const ticketsCount = totalTickets.length;
+  const stringified = ticketsCount.toString();
+
+  let ticketID = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  if (stringified.length < 5) {
+    return ticketID.concat(stringified.padStart(5, "0"));
+  } else {
+    return ticketID.concat(stringified);
+  }
+}
+
+async function newDebitTransaction(data, ticketID) {
+  const totalFare =
+    parseInt(data.fareDetails.bookQty) * parseInt(data.fareDetails.rate) +
+    parseInt(data.fareDetails.infantCharges);
+  const accountData = {
+    userID: data.agent.id,
+    transType: "debit",
+    ticket: {
+      ticketID,
+      travelDate: data.agent.travelDate,
+      pnr: data.travel.pnr,
+      totalFare,
+    },
+  };
+  const newEnry = new AccountsModel(accountData);
+  newEnry.save((err, accountData) => {
+    if (err) console.log(err);
+    else console.log(accountData);
+  });
+}
+
 router.post("/", async (req, res, next) => {
-  const data = req.body;
+  const data = { ...req.body };
   const isValid = await validate(data);
   if (isValid) {
     await updateSalableTicket(data);
     await updateStock(data);
     await updateLimit(data);
+    const ticketID = await getTecketID(data);
+    data.ticketID = ticketID;
     const newBooking = new BookTicketModel({ ...data });
     newBooking.save((err, newBooking) => {
       if (err) {
@@ -134,6 +174,7 @@ router.post("/", async (req, res, next) => {
         });
       }
     });
+    await newDebitTransaction(data, ticketID);
   } else {
     res.status(400).send({
       error:

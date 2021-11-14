@@ -58,6 +58,7 @@ const bookTicketSchema = mongoose.Schema({
     saleReff: { type: String, default: "na" },
     saleDate: { type: Date },
   },
+  ticketID: { type: String, require: true },
 });
 
 const BookTicketModel = mongoose.model("booking", bookTicketSchema);

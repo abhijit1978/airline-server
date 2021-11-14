@@ -12,6 +12,7 @@ const locationsRouter = require("./routes/locations");
 const airlinesRouter = require("./routes/airlines");
 const ticketsRouter = require("./routes/tickets");
 const bookingRoutes = require("./routes/bookings");
+const accountsRoutes = require("./routes/accounts");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/bfly/locations", locationsRouter);
 app.use("/api/bfly/airlines", airlinesRouter);
 app.use("/api/bfly/tickets", ticketsRouter);
 app.use("/api/bfly/ticketsBooking", bookingRoutes);
+app.use("/api/bfly/accounts", accountsRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
