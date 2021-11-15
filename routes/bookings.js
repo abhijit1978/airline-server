@@ -5,23 +5,19 @@ const SalableTicketModel = require("../models/tickets/salable.model");
 const StockModel = require("../models/tickets/stock.model");
 const UserModel = require("../models/users.model");
 const AccountsModel = require("../models/accounts.model");
-const Moment = require("moment");
-
-let oldLimit = 0;
+const AccountBalanceModel = require("../models/accountBalance.model");
 
 async function validate(data) {
   let valid = false;
-
   const salableTicket = await getSalable(data.travel.pnr);
-  const salableQty = salableTicket.length ? salableTicket[0].salable.qty : 0;
+  const salableQty = salableTicket ? salableTicket.salable.qty : 0;
   const user = await findUserById(data.agent.id);
-  oldLimit = user.limit;
   const rate = data.fareDetails.rate;
 
   if (
     salableQty >= data.fareDetails.bookQty &&
-    salableTicket[0].salable.salePrice === rate &&
-    oldLimit >= rate * data.fareDetails.bookQty
+    salableTicket.salable.salePrice === rate &&
+    user.limit >= rate * data.fareDetails.bookQty
   ) {
     valid = true;
   }
@@ -29,7 +25,7 @@ async function validate(data) {
 }
 
 async function getSalable(pnr) {
-  return await SalableTicketModel.find({ pnr });
+  return await SalableTicketModel.findOne({ pnr });
 }
 
 async function findUserById(id) {
@@ -37,11 +33,14 @@ async function findUserById(id) {
 }
 
 async function updateLimit(data) {
-  const userId = data.agent.id;
-  const newLimit = oldLimit - data.fareDetails.rate * data.fareDetails.bookQty;
+  const user = await findUserById(data.agent.id);
   return await UserModel.findByIdAndUpdate(
-    { _id: userId },
-    { $set: { limit: newLimit } },
+    { _id: data.agent.id },
+    {
+      $set: {
+        limit: user.limit - data.fareDetails.rate * data.fareDetails.bookQty,
+      },
+    },
     { new: true }
   );
 }
@@ -79,8 +78,7 @@ async function updateStock(data) {
 }
 
 async function updateSalableTicket(data) {
-  const tickets = await getSalable(data.travel.pnr);
-  const ticket = tickets[0]["_doc"];
+  const ticket = await getSalable(data.travel.pnr);
   await SalableTicketModel.findOneAndUpdate(
     { pnr: data.travel.pnr },
     { $set: { "salable.qty": ticket.salable.qty - data.fareDetails.bookQty } },
@@ -153,6 +151,35 @@ async function newDebitTransaction(data, ticketID) {
   });
 }
 
+async function manageLimit(data) {
+  const user = await AccountBalanceModel.findOne({ userID: data.agent.id });
+  if (user) {
+    await AccountBalanceModel.findOneAndUpdate(
+      { userID: data.agent.id },
+      {
+        $set: {
+          due: user.due + data.fareDetails.bookQty * data.fareDetails.rate,
+        },
+      },
+      {
+        new: true,
+        useFindAndModify: false,
+      }
+    );
+  } else {
+    const userData = {
+      due: data.fareDetails.bookQty * data.fareDetails.rate,
+      balance: 0,
+      userID: data.agent.id,
+    };
+    const newEnry = new AccountBalanceModel(userData);
+    newEnry.save((err, response) => {
+      if (err) console.log(err);
+      else console.log(response);
+    });
+  }
+}
+
 router.post("/", async (req, res, next) => {
   const data = { ...req.body };
   const isValid = await validate(data);
@@ -175,6 +202,7 @@ router.post("/", async (req, res, next) => {
       }
     });
     await newDebitTransaction(data, ticketID);
+    await manageLimit(data);
   } else {
     res.status(400).send({
       error:
