@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const path = require("path");
 const UserModel = require("./../models/users.model");
 
 const nodemailer = require("nodemailer");
@@ -18,7 +19,7 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-async function sendMail(userEmail) {
+async function sendMail(user) {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
 
@@ -36,9 +37,15 @@ async function sendMail(userEmail) {
 
     const mailOptions = {
       from: "Barkat Tours and Travels <barkat.travel@gmail.com>",
-      to: userEmail,
-      subject: "Mail sent using oAuth",
-      text: "Mail sent using oAuth",
+      to: user.email,
+      subject: "Approval of your application to become our partner",
+      text: `Congratulations ${user.name.firstName} ${user.name.lastName}!!!
+              Your application to become our partner is being approved.
+              Now you can login with your registered Email and Password.
+              
+              Thanks and regards,
+              Barkat Tours and Travels,
+              Prop. Barkat Sheikh`,
     };
 
     const result = await transport.sendMail(mailOptions);
@@ -50,7 +57,7 @@ async function sendMail(userEmail) {
 
 const storage = multer.diskStorage({
   destination: function (req, file, callBack) {
-    callBack(null, "./public/images/uploads");
+    callBack(null, path.join(__dirname, "../public/images/uploads"));
   },
   filename: function (req, file, callBack) {
     let fileName = "";
@@ -269,9 +276,11 @@ router.put("/role", async function (req, res, next) {
   if (foundUser) {
     const user = await updateUserRole(id, type);
     res.status(200).send(user);
-    sendMail(user.email)
-      .then((result) => console.log("mail sent"))
-      .catch((error) => console.log(error.message));
+    if (type !== "Unknown") {
+      sendMail(user)
+        .then((result) => console.log("mail sent", result))
+        .catch((error) => console.log(error.message));
+    }
   } else {
     res.status(400).send("User not found!");
   }

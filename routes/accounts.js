@@ -3,6 +3,14 @@ const router = express.Router();
 const AccountsModel = require("../models/accounts.model");
 const AccountBalanceModel = require("../models/accountBalance.model");
 
+async function confirmReceipt(data) {
+  return await AccountsModel.findByIdAndUpdate(
+    { _id: data._id },
+    { $set: { "payment.confirmReceipt": true } },
+    { new: true }
+  );
+}
+
 // Updated Account Due and Balance on confirm payment receipt
 router.post("/updateBalance", async (req, res, next) => {
   const { userID, amount } = { ...req.body };
@@ -16,6 +24,8 @@ router.post("/updateBalance", async (req, res, next) => {
     const options = { new: true, useFindAndModify: false };
 
     await AccountBalanceModel.findOneAndUpdate(filer, updateObj, options);
+    await confirmReceipt(req.body);
+
     res.status(200).send({
       error: "undefind",
       message: "Balance updated succefully.",
@@ -26,6 +36,7 @@ router.post("/updateBalance", async (req, res, next) => {
       balance: amount,
       userID,
     };
+    await confirmReceipt(req.body);
     const newEnry = new AccountBalanceModel(userData);
     newEnry.save((err, response) => {
       if (err) res.status(400).send({ error: err });

@@ -131,6 +131,7 @@ async function getTecketID(data) {
 }
 
 async function newDebitTransaction(data, ticketID) {
+  console.log(data);
   const totalFare =
     parseInt(data.fareDetails.bookQty) * parseInt(data.fareDetails.rate) +
     parseInt(data.fareDetails.infantCharges);
@@ -139,7 +140,7 @@ async function newDebitTransaction(data, ticketID) {
     transType: "debit",
     ticket: {
       ticketID,
-      travelDate: data.agent.travelDate,
+      travelDate: data.travel.travelDate,
       pnr: data.travel.pnr,
       totalFare,
     },
@@ -180,6 +181,7 @@ async function manageLimit(data) {
   }
 }
 
+// Ticket Booking
 router.post("/", async (req, res, next) => {
   const data = { ...req.body };
   const isValid = await validate(data);
@@ -211,11 +213,13 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+// Get all booked tickets
 router.post("/getBookedTickets", async (req, res, next) => {
   const allBookedTickets = await getAllBookedTickets(req.body);
   res.status(200).send(allBookedTickets);
 });
 
+// Confirming sale
 router.post("/confirmSale", async (req, res, next) => {
   if (isValidSaleData()) {
     const soldTicket = await confirmSale(req.body);
