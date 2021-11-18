@@ -2,6 +2,11 @@ const express = require("express");
 const router = express.Router();
 const AccountsModel = require("../models/accounts.model");
 const AccountBalanceModel = require("../models/accountBalance.model");
+const UserModel = require("../models/users.model");
+
+async function findUserById(_id) {
+  return await UserModel.findById({ _id });
+}
 
 async function confirmReceipt(data) {
   return await AccountsModel.findByIdAndUpdate(
@@ -11,7 +16,20 @@ async function confirmReceipt(data) {
   );
 }
 
-// Updated Account Due and Balance on confirm payment receipt
+async function updateLimit(data) {
+  const user = await findUserById(data.userID);
+  return await UserModel.findByIdAndUpdate(
+    { _id: data.userID },
+    {
+      $set: {
+        limit: user.limit + data.amount,
+      },
+    },
+    { new: true }
+  );
+}
+
+// Updated Account Due, Balance and Cr. Limit on confirm receipt
 router.post("/updateBalance", async (req, res, next) => {
   const { userID, amount } = { ...req.body };
   const user = await AccountBalanceModel.findOne({ userID });
@@ -25,6 +43,7 @@ router.post("/updateBalance", async (req, res, next) => {
 
     await AccountBalanceModel.findOneAndUpdate(filer, updateObj, options);
     await confirmReceipt(req.body);
+    await updateLimit(req.body);
 
     res.status(200).send({
       error: "undefind",

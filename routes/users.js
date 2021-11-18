@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const UserModel = require("./../models/users.model");
+const AccountBalanceModel = require("./../models/accountBalance.model");
 
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
@@ -186,6 +187,12 @@ const generateID = (pan, firstName, lastName) => {
   return `${firstName.substr(0, 1)}${lastName.substr(0, 1)}${pan.substr(5, 5)}`;
 };
 
+async function getUserBalance(userID) {
+  return await AccountBalanceModel.findOne({
+    userID: "6186caea8215792d19567267",
+  });
+}
+
 // Get all users list.
 router.get("/", async function (req, res, next) {
   const users = await getUsers();
@@ -222,6 +229,8 @@ router.put("/login", async function (req, res, next) {
   if (foundUser) {
     if (foundUser.isApproved && foundUser.userType !== "Unknown") {
       const updatedUserData = await updateLoginStatus(foundUser._id, true);
+      const userBalance = await getUserBalance();
+      console.log("userBalance ====>", userBalance);
       res.status(200).send({
         user: {
           id: updatedUserData._id,
@@ -238,6 +247,10 @@ router.put("/login", async function (req, res, next) {
           panImgUrl: updatedUserData.panImgUrl,
           contactNo: updatedUserData.contactNo,
           alternateNo: updatedUserData.alternateNo,
+          balance: {
+            due: userBalance.due,
+            balance: userBalance.balance,
+          },
         },
         message: `Login success!`,
       });
