@@ -37,8 +37,8 @@ router.post("/updateBalance", async (req, res, next) => {
     const filer = { userID };
     const updateObj =
       user.due >= amount
-        ? { $set: { due: user.due - amount } }
-        : { $set: { due: 0, balance: amount - user.due } };
+        ? { $set: { due: user.due - amount, balance: 0 } }
+        : { $set: { due: 0, balance: user.balance + (amount - user.due) } };
     const options = { new: true, useFindAndModify: false };
 
     await AccountBalanceModel.findOneAndUpdate(filer, updateObj, options);

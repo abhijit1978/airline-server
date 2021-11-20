@@ -131,7 +131,6 @@ async function getTecketID(data) {
 }
 
 async function newDebitTransaction(data, ticketID) {
-  console.log(data);
   const totalFare =
     parseInt(data.fareDetails.bookQty) * parseInt(data.fareDetails.rate) +
     parseInt(data.fareDetails.infantCharges);
@@ -152,14 +151,34 @@ async function newDebitTransaction(data, ticketID) {
   });
 }
 
-async function manageLimit(data) {
+function getDue(user, ticketFare) {
+  if (user.balance < ticketFare) {
+    return Math.abs(user.balance - ticketFare) + user.due;
+  } else {
+    return 0;
+  }
+}
+
+function getBalance(user, ticketFare) {
+  if (user.balance < ticketFare) {
+    return 0;
+  } else {
+    return Math.abs(user.balance - ticketFare);
+  }
+}
+
+async function manageBalance(data) {
+  const ticketFare =
+    parseInt(data.fareDetails.bookQty) * parseInt(data.fareDetails.rate);
   const user = await AccountBalanceModel.findOne({ userID: data.agent.id });
+
   if (user) {
     await AccountBalanceModel.findOneAndUpdate(
       { userID: data.agent.id },
       {
         $set: {
-          due: user.due + data.fareDetails.bookQty * data.fareDetails.rate,
+          due: getDue(user, ticketFare),
+          balance: getBalance(user, ticketFare),
         },
       },
       {
@@ -204,7 +223,7 @@ router.post("/", async (req, res, next) => {
       }
     });
     await newDebitTransaction(data, ticketID);
-    await manageLimit(data);
+    await manageBalance(data);
   } else {
     res.status(400).send({
       error:

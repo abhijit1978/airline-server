@@ -175,10 +175,10 @@ async function changePsd(_id, password) {
   );
 }
 
-async function setimit(_id, limit) {
+async function setimit(user, limit) {
   return await UserModel.findByIdAndUpdate(
-    { _id },
-    { $set: { limit } },
+    { _id: user._id },
+    { $set: { limit: parseInt(user.limit) + parseInt(limit) } },
     { new: true }
   );
 }
@@ -188,9 +188,7 @@ const generateID = (pan, firstName, lastName) => {
 };
 
 async function getUserBalance(userID) {
-  return await AccountBalanceModel.findOne({
-    userID: "6186caea8215792d19567267",
-  });
+  return await AccountBalanceModel.findOne({ userID });
 }
 
 // Get all users list.
@@ -202,6 +200,8 @@ router.get("/", async function (req, res, next) {
 // Get one user.
 router.post("/oneUser", async function (req, res, next) {
   const user = await UserModel.findById(req.body.id);
+  const userBalance = await getUserBalance(req.body.id);
+
   res.status(200).send({
     user: {
       id: user._id,
@@ -218,6 +218,10 @@ router.post("/oneUser", async function (req, res, next) {
       panImgUrl: user.panImgUrl,
       contactNo: user.contactNo,
       alternateNo: user.alternateNo,
+      balance: {
+        due: userBalance ? userBalance.due : 0,
+        balance: userBalance ? userBalance.balance : 0,
+      },
     },
   });
 });
@@ -229,8 +233,8 @@ router.put("/login", async function (req, res, next) {
   if (foundUser) {
     if (foundUser.isApproved && foundUser.userType !== "Unknown") {
       const updatedUserData = await updateLoginStatus(foundUser._id, true);
-      const userBalance = await getUserBalance();
-      console.log("userBalance ====>", userBalance);
+      const userBalance = await getUserBalance(foundUser._id);
+
       res.status(200).send({
         user: {
           id: updatedUserData._id,
@@ -248,8 +252,8 @@ router.put("/login", async function (req, res, next) {
           contactNo: updatedUserData.contactNo,
           alternateNo: updatedUserData.alternateNo,
           balance: {
-            due: userBalance.due,
-            balance: userBalance.balance,
+            due: userBalance ? userBalance.due : 0,
+            balance: userBalance ? userBalance.balance : 0,
           },
         },
         message: `Login success!`,
@@ -328,7 +332,7 @@ router.put("/setLimit", async function (req, res, next) {
   const { id, limit } = { ...req.body };
   const user = await findUserById(id);
   if (user) {
-    await setimit(id, limit);
+    await setimit(user, limit);
     res
       .status(200)
       .send({ message: "Limit updated succeffully", error: undefined });
