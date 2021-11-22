@@ -7,12 +7,13 @@ const AccountBalanceModel = require("./../models/accountBalance.model");
 
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const CLIENT_ID =
-  "546266880705-d33jt2ips8qecf254a5ldaaircem6miq.apps.googleusercontent.com";
-const CLIENT_SECRET = "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";
-const REFRESH_TOKEN =
-  "1//04ySzbrFqs0waCgYIARAAGAQSNwF-L9Ir5XaMb48pQUOzY7H8BOo2Ec5REdM1jDTVBl5uzBMjOG6LawDqWQkAxfEvR_yYj7LDH-I";
-const REDIRECT_URI = "https://developers.google.com/oauthplayground";
+const {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REFRESH_TOKEN,
+  REDIRECT_URI,
+} = require("../configs/dev.config");
+
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,

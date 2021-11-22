@@ -15,6 +15,7 @@ const accountsSchema = mongoose.Schema({
     branchName: { type: String, default: "" },
     transID: { type: String, default: "" },
     amount: { type: Number, default: 0 },
+    paymentDate: { type: Date, default: "" },
     confirmReceipt: { type: Boolean, default: false },
   },
 });

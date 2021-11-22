@@ -88,6 +88,7 @@ router.post("/payment", async (req, res, next) => {
       branchName: data.bankBranchName,
       transID: data.transactionID,
       amount: data.amount,
+      paymentDate: data.paymentDate,
     },
   };
   const newEnry = new AccountsModel(paymentData);

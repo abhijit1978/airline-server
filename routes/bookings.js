@@ -7,6 +7,61 @@ const UserModel = require("../models/users.model");
 const AccountsModel = require("../models/accounts.model");
 const AccountBalanceModel = require("../models/accountBalance.model");
 
+// =============== Mail function
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REFRESH_TOKEN,
+  REDIRECT_URI,
+} = require("../configs/dev.config");
+
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+async function sendMail(data) {
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
+
+    const transport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: "barkat.travel@gmail.com",
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken,
+      },
+    });
+
+    const mailOptions = {
+      from: "Barkat Tours and Travels <barkat.travel@gmail.com>",
+      to: [
+        "barkat.travel@gmail.com",
+        data.agent.email,
+        data.passenger.contacts.emailID,
+      ],
+      subject: `E-Ticket No.${data.ticketID} `,
+      html: `
+        <p>Thank you for booking ticket from us.</p>
+        <p>Thanks and regards,<br />Barkat Tours and Travels,<br />Prop. Barkat Sheikh</p>
+      `,
+    };
+
+    const result = await transport.sendMail(mailOptions);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+}
+// =============== Mail function end
+
 async function validate(data) {
   let valid = false;
   const salableTicket = await getSalable(data.travel.pnr);
@@ -224,6 +279,7 @@ router.post("/", async (req, res, next) => {
     });
     await newDebitTransaction(data, ticketID);
     await manageBalance(data);
+    await sendMail(data);
   } else {
     res.status(400).send({
       error:
