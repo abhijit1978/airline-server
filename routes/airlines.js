@@ -23,7 +23,7 @@ async function findAirlines(code) {
 }
 
 // Get all Airlines
-router.get("/", async function (req, res, next) {
+router.post("/", async function (req, res, next) {
   const airlines = await getAirlines();
   res.status(200).send(airlines);
 });

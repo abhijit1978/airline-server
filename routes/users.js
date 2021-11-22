@@ -192,7 +192,7 @@ async function getUserBalance(userID) {
 }
 
 // Get all users list.
-router.get("/", async function (req, res, next) {
+router.post("/", async function (req, res, next) {
   const users = await getUsers();
   res.status(200).send(users);
 });
