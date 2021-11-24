@@ -50,7 +50,7 @@ async function updateAirline(data) {
 }
 
 // Add new Airline
-router.post("/", upload.any(), async (req, res, next) => {
+router.post("/new", upload.any(), async (req, res, next) => {
   let airlineLogo = "";
   req.files.forEach((item) => {
     airlineLogo = item.path.replace("public", "");

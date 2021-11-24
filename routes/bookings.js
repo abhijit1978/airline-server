@@ -6,6 +6,7 @@ const StockModel = require("../models/tickets/stock.model");
 const UserModel = require("../models/users.model");
 const AccountsModel = require("../models/accounts.model");
 const AccountBalanceModel = require("../models/accountBalance.model");
+const moment = require("moment");
 
 // =============== Mail function
 const nodemailer = require("nodemailer");
@@ -50,6 +51,79 @@ async function sendMail(data) {
       subject: `E-Ticket No.${data.ticketID} `,
       html: `
         <p>Thank you for booking ticket from us.</p>
+        <table width="100%">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000">PNR Number</th>
+              <th style="border: 1px solid #000">Booked on</th>
+              <th style="border: 1px solid #000">Status</th>
+              <th style="border: 1px solid #000">Booking ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; text-align: left;">${
+                data.travel.pnr
+              }</td>
+              <td style="border: 1px solid #000; text-align: left;">
+                ${moment(new Date(data.agent.bookingDate)).format(
+                  "dddd, MMMM Do YYYY"
+                )}
+              </td>
+              <td style="border: 1px solid #000; text-align: left;">Confirmed</td>
+              <td style="border: 1px solid #000; text-align: left;">${
+                data.ticketID
+              }</td>
+            </tr>
+          </tbody>
+        </table>
+        <table width="100%">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000">Flight</th>
+              <th style="border: 1px solid #000">Departure</th>
+              <th style="border: 1px solid #000">Arrival</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; text-align: left;">
+                <strong>${data.travel.airlineName}</strong></br>
+                <strong>Flight No.: </strong> ${data.travel.flightNumber}</br>
+                <strong>Cabin: </strong> Econom</br>
+              </td>
+              <td style="border: 1px solid #000; text-align: left;">
+                ${data.travel.location.locationCode.split("-")[0]}</br>
+                  ${moment(new Date(data.travel.travelDate)).format(
+                    "dddd, MMMM Do YYYY"
+                  )} at ${data.travel.departureTime}
+                </br>
+              </td>
+              <td style="border: 1px solid #000; text-align: left;">
+                ${data.travel.location.locationCode.split("-")[1]}</br>
+                at ${data.travel.arrivalTime}</br>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table width="100%">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000">Passengers</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border: 1px solid #000; text-align: left;">
+                ${data.passenger.passengers
+                  .map((psg) => {
+                    return `${psg.title} ${psg.firstName} ${psg.lastName} <br />`;
+                  })
+                  .join("")}
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <p>Thanks and regards,<br />Barkat Tours and Travels,<br />Prop. Barkat Sheikh</p>
       `,
     };
@@ -59,6 +133,14 @@ async function sendMail(data) {
   } catch (error) {
     console.log(error);
   }
+}
+
+function getPassengers(passengers) {
+  passengers
+    .map((psg) => {
+      return `${psg.title} ${psg.firstName} ${psg.lastName} <br />`;
+    })
+    .join("");
 }
 // =============== Mail function end
 
@@ -202,7 +284,7 @@ async function newDebitTransaction(data, ticketID) {
   const newEnry = new AccountsModel(accountData);
   newEnry.save((err, accountData) => {
     if (err) console.log(err);
-    else console.log(accountData);
+    else console.log("success");
   });
 }
 

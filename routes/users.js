@@ -345,7 +345,7 @@ router.put("/setLimit", async function (req, res, next) {
 });
 
 // Add new user.
-router.post("/", upload.any(), async (req, res, next) => {
+router.post("/new", upload.any(), async (req, res, next) => {
   const isUserExist = await findUser(req.body.email);
   const {
     firstName,

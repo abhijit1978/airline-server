@@ -32,7 +32,7 @@ router.post("/", async function (req, res, next) {
 });
 
 // Add new Loation
-router.post("/", async (req, res, next) => {
+router.post("/new", async (req, res, next) => {
   const isLocationExist = await findLocation(req.body.locationCode);
   const { locationName, locationCode, srcAirportName, destAirportName } = {
     ...req.body,
