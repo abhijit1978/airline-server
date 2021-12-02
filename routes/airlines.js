@@ -1,11 +1,12 @@
 const express = require("express");
+const path = require("path");
 const router = express.Router();
 const multer = require("multer");
 const AirlineModel = require("../models/airlines.model");
 
 const storage = multer.diskStorage({
   destination: function (req, file, callBack) {
-    callBack(null, "./public/images/uploads/");
+    callBack(null, path.join(__dirname, "../public/images/uploads"));
   },
   filename: function (req, file, callBack) {
     callBack(null, `airline-${new Date().getTime()}.png`);
@@ -53,7 +54,10 @@ async function updateAirline(data) {
 router.post("/new", upload.any(), async (req, res, next) => {
   let airlineLogo = "";
   req.files.forEach((item) => {
-    airlineLogo = item.path.replace("public", "");
+    airlineLogo = item.path.replace(
+      "/home/barkattravels/public_html/public",
+      ""
+    );
   });
   const isAirlineExist = await findAirlines(req.body.airlineCode);
 
@@ -81,7 +85,10 @@ router.post("/new", upload.any(), async (req, res, next) => {
 router.put("/", upload.any(), async (req, res, next) => {
   let airlineLogo = "";
   req.files.forEach((item) => {
-    airlineLogo = item.path.replace("public", "");
+    airlineLogo = item.path.replace(
+      "/home/barkattravels/public_html/public",
+      ""
+    );
   });
   const result = await updateAirline({ ...req.body, airlineLogo });
   if (result) res.status(200).send(result);

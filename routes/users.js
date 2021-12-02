@@ -371,9 +371,15 @@ router.post("/new", upload.any(), async (req, res, next) => {
     let panImgUrl = "";
     req.files.forEach((item) => {
       if (item.fieldname === "aadharImage") {
-        aadharImgUrl = item.path.replace("public", "");
+        aadharImgUrl = item.path.replace(
+          "/home/barkattravels/public_html/public",
+          ""
+        );
       } else {
-        panImgUrl = item.path.replace("public", "");
+        panImgUrl = item.path.replace(
+          "/home/barkattravels/public_html/public",
+          ""
+        );
       }
     });
     const newUser = new UserModel({
