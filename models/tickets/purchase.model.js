@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const purchaseSchema = mongoose.Schema({
   airlineName: { type: String, require: true, minlength: 3, maxlength: 50 },
+  airlineID: { type: String, require: true, minlength: 3, maxlength: 50 },
   flightNumber: { type: String, require: true, minlength: 3, maxlength: 10 },
   location: { type: String, require: true, minlength: 3, maxlength: 50 },
   travelDate: { type: Date, require: true },

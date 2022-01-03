@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bookTicketSchema = mongoose.Schema({
   travel: {
     airlineName: { type: String, require: true, minlength: 3, maxlength: 50 },
+    airlineID: { type: String, require: true, minlength: 3, maxlength: 50 },
     flightNumber: { type: String, require: true, minlength: 3, maxlength: 10 },
     location: {
       locationCode: {

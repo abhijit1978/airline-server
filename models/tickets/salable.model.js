@@ -4,6 +4,7 @@ const salableTicketSchema = mongoose.Schema({
   pnr: { type: String, require: true, minlength: 3, maxlength: 20 },
   flightNumber: { type: String, require: true, minlength: 3, maxlength: 10 },
   airlineName: { type: String, require: true, minlength: 3, maxlength: 50 },
+  airlineID: { type: String, require: true, minlength: 3, maxlength: 50 },
   location: {
     locationName: { type: String, require: true, minlength: 3, maxlength: 50 },
     locationCode: { type: String, require: true, minlength: 3, maxlength: 50 },

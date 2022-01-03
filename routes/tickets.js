@@ -94,6 +94,33 @@ async function isSalable(startDate, endDate, pnr, qty) {
   }
 }
 
+async function updateSalableTicket(data) {
+  if (!findTickets) return;
+  return SalableTicketModel.findOneAndUpdate(
+    { pnr: data.pnr },
+    {
+      $set: {
+        pnr: data.pnr,
+        departureTime: data.departureTime,
+        arrivalTime: data.arrivalTime,
+        flightNumber: data.flightNumber,
+      },
+    },
+    { new: true }
+  );
+}
+
+// Route - Update Ticket
+router.put("/edit", async function (req, res, next) {
+  await PurchaseModel.findByIdAndUpdate(
+    { _id: req.body._id },
+    { $set: { ...req.body } },
+    { new: true }
+  );
+  await updateSalableTicket(req.body);
+  res.status(200).send("Update successful.");
+});
+
 // Route - Get all Tickets
 router.post("/", async function (req, res, next) {
   const tickets = await getTickets(req.body);
@@ -119,6 +146,7 @@ router.post("/purchase", async (req, res, next) => {
   const isTicketExist = await findTickets(req.body.pnr);
   const {
     airlineName,
+    airlineID,
     flightNumber,
     location,
     travelDate,
@@ -131,6 +159,7 @@ router.post("/purchase", async (req, res, next) => {
   } = { ...req.body };
   const newTicket = new PurchaseModel({
     airlineName,
+    airlineID,
     flightNumber,
     location,
     travelDate,
@@ -178,6 +207,7 @@ router.post("/salable", async (req, res, next) => {
         pnr: req.body.pnr,
         flightNumber: req.body.flightNumber,
         airlineName: req.body.airlineName,
+        airlineID: req.body.airlineID,
         location: {
           locationName: req.body.locationName,
           locationCode: req.body.locationCode,
