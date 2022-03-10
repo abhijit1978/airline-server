@@ -8,6 +8,13 @@ async function findUserById(_id) {
   return await UserModel.findById({ _id });
 }
 
+async function checkValidPyamentId(data) {
+  return await AccountsModel.find({
+    userID: data.userID,
+    "payment.transID": data.transactionID,
+  });
+}
+
 async function confirmReceipt(data) {
   return await AccountsModel.findByIdAndUpdate(
     { _id: data._id },
@@ -67,7 +74,7 @@ router.post("/updateBalance", async (req, res, next) => {
   }
 });
 
-//Get Account Transactions of USER
+//User specific accout statement
 router.post("/statement", async (req, res, next) => {
   const statement = await AccountsModel.find({ userID: req.body.id });
   if (statement.length) {
@@ -80,31 +87,55 @@ router.post("/statement", async (req, res, next) => {
 // Make payment
 router.post("/payment", async (req, res, next) => {
   const data = { ...req.body };
-  const paymentData = {
-    userID: data.userID,
-    transType: "credit",
-    payment: {
-      bankName: data.bankName,
-      branchName: data.bankBranchName,
-      transID: data.transactionID,
-      amount: data.amount,
-      paymentDate: data.paymentDate,
-    },
-  };
-  const newEnry = new AccountsModel(paymentData);
+  const isPaymentIdExist = await checkValidPyamentId(data);
+  if (isPaymentIdExist.length >= 1) {
+    res
+      .status(400)
+      .send({ error: "Payment ID already Exists", errorType: "Duplicate ID" });
+  } else {
+    const paymentData = {
+      userID: data.userID,
+      transType: "credit",
+      payment: {
+        bankName: data.bankName,
+        branchName: data.bankBranchName,
+        transID: data.transactionID,
+        amount: data.amount,
+        paymentDate: data.paymentDate,
+      },
+    };
+    const newEnry = new AccountsModel(paymentData);
 
-  newEnry.save((err, accountData) => {
-    if (err) {
-      res.status(400).send({
-        error: err,
-        message: "Transaction failed. Please try again latter",
-      });
-    } else {
-      res
-        .status(200)
-        .send({ error: undefined, message: "Payment data received." });
-    }
+    newEnry.save((err, accountData) => {
+      if (err) {
+        res.status(400).send({
+          error: err,
+          message: "Transaction failed. Please try again latter",
+        });
+      } else {
+        res
+          .status(200)
+          .send({ error: undefined, message: "Payment data received." });
+      }
+    });
+  }
+});
+
+// Get pending payment requests
+router.post("/pending_payment_requests", async (req, res, next) => {
+  const pendngPayments = await AccountsModel.find({
+    transType: "credit",
+    "payment.confirmReceipt": false,
   });
+  res.status(200).send(pendngPayments);
+});
+
+// Delete payment request
+router.post("/delete_payment_request", async (req, res, next) => {
+  const deleted = await AccountsModel.deleteOne({ _id: req.body._id });
+  res
+    .status(200)
+    .send({ error: undefined, message: `${deleted} reecord deleted.` });
 });
 
 module.exports = router;

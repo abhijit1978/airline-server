@@ -176,6 +176,18 @@ async function changePsd(_id, password) {
   );
 }
 
+async function updateAgencyName(_id, agencyName) {
+  return await UserModel.findByIdAndUpdate(
+    { _id },
+    {
+      $set: {
+        agencyName,
+      },
+    },
+    { new: true }
+  );
+}
+
 async function setimit(user, limit) {
   return await UserModel.findByIdAndUpdate(
     { _id: user._id },
@@ -208,6 +220,7 @@ router.post("/oneUser", async function (req, res, next) {
       id: user._id,
       userID: user.userID,
       name: user.name,
+      agencyName: user.agencyName,
       email: user.email,
       isLoggedIn: user.isLoggedIn,
       userType: user.userType,
@@ -241,6 +254,7 @@ router.put("/login", async function (req, res, next) {
           id: updatedUserData._id,
           userID: updatedUserData.userID,
           name: updatedUserData.name,
+          agencyName: updatedUserData.agencyName,
           email: updatedUserData.email,
           isLoggedIn: updatedUserData.isLoggedIn,
           userType: updatedUserData.userType,
@@ -260,11 +274,7 @@ router.put("/login", async function (req, res, next) {
         message: `Login success!`,
       });
     } else {
-      res
-        .status(400)
-        .send(
-          "Your application is not approved yet. Please contact at fly.com"
-        );
+      res.status(400).send("Your application is not approved yet.");
     }
   } else {
     res.status(400).send("Email or Password does not match!");
@@ -316,6 +326,42 @@ router.post("/changePassword", async function (req, res, next) {
   }
 });
 
+// Update Agency Name
+router.post("/updateAgencyName", async function (req, res, next) {
+  const { id, agencyName } = { ...req.body };
+  const foundUser = await findUserById(id);
+  if (!foundUser) {
+    res.status(400).send("User not found.");
+  } else {
+    const user = await updateAgencyName(id, agencyName);
+    const userBalance = await getUserBalance(foundUser._id);
+    res.status(200).send({
+      error: undefined,
+      user: {
+        id: user._id,
+        userID: user.userID,
+        name: user.name,
+        agencyName: user.agencyName,
+        email: user.email,
+        isLoggedIn: user.isLoggedIn,
+        userType: user.userType,
+        limit: user.limit,
+        address: user.address,
+        aadharNo: user.aadharNo,
+        aadharImgUrl: user.aadharImgUrl,
+        pan: user.pan,
+        panImgUrl: user.panImgUrl,
+        contactNo: user.contactNo,
+        alternateNo: user.alternateNo,
+        balance: {
+          due: userBalance?.due || 0,
+          balance: userBalance?.balance || 0,
+        },
+      },
+    });
+  }
+});
+
 // Forgot Password
 router.post("/forgotPassword", async function (req, res, next) {
   const { email, aadharNo, pan } = { ...req.body };
@@ -351,6 +397,7 @@ router.post("/new", upload.any(), async (req, res, next) => {
     firstName,
     middleName = "",
     lastName,
+    agencyName,
     email,
     contactNo,
     alternateNo = 0,
@@ -384,6 +431,7 @@ router.post("/new", upload.any(), async (req, res, next) => {
     });
     const newUser = new UserModel({
       name: { firstName, middleName, lastName },
+      agencyName,
       email,
       contactNo,
       alternateNo,

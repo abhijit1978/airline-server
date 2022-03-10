@@ -6,6 +6,7 @@ const userSchema = mongoose.Schema({
     middleName: { type: String, required: false, maxlength: 50 },
     lastName: { type: String, required: true, minlength: 2, maxlength: 50 },
   },
+  agencyName: { type: String, required: true, minlength: 2, maxlength: 100 },
   email: { type: String, require: true, minlength: 9, maxlength: 50 },
   contactNo: { type: Number, require: true, minlength: 10, maxlength: 10 },
   alternateNo: { type: Number, require: false, minlength: 0, maxlength: 10 },
