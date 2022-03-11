@@ -192,6 +192,24 @@ async function getAllBookedTickets(data) {
   }
 }
 
+// async function getAllBookedTickets(data) {
+//   const limit = 10;
+//   const skip = 5;
+//   if (!data.agentId) {
+//     return await BookTicketModel.find()
+//       .sort({ "agent.bookingDate": -1 })
+//       .limit(limit)
+//       .skip(skip);
+//   } else {
+//     return await BookTicketModel.find({ "agent.id": data.agentId })
+//       .sort({
+//         "agent.bookingDate": -1,
+//       })
+//       .limit(limit)
+//       .skip(skip);
+//   }
+// }
+
 async function getTicketStock(pnr) {
   return await StockModel.find({ pnr });
 }
